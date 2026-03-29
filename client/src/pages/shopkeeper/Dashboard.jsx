@@ -6,7 +6,9 @@ import { useSocket } from '../../context/SocketContext';
 import BidTimer from '../../components/BidTimer';
 import toast from 'react-hot-toast';
 import { FiPlusCircle, FiPackage, FiBarChart2, FiSettings, FiTrendingUp, FiEye, FiAlertCircle, FiSearch, FiStopCircle, FiCheckCircle, FiClock, FiShoppingBag, FiX } from 'react-icons/fi';
-
+import ConfirmModal from '../../components/ConfirmModal';
+const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null, danger: false, confirmLabel: 'Confirm' });
+const closeModal = () => setModal(m => ({ ...m, open: false }));
 export default function Dashboard() {
   const { user } = useAuth();
   const { on, off } = useSocket();
@@ -44,13 +46,25 @@ export default function Dashboard() {
     return () => { off('payment_made_by_buyer'); off('auction_reopened'); };
   }, []);
 
-  const handleEndAuction = async (productId) => {
-    if (!window.confirm('End this auction now?')) return;
-    setEndingId(productId);
-    try { await api.post(`/payment/${productId}/end`); toast.success('Auction ended!'); load(); }
-    catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
-    finally { setEndingId(null); }
-  };
+const handleManualToggle = async (productId, newStatus) => {
+  const isPaid = newStatus === 'paid';
+  setModal({
+    open: true,
+    title: isPaid ? 'Confirm Payment Received?' : 'Reject Payment?',
+    message: isPaid
+      ? 'This will confirm the payment and generate an Order ID for the buyer.'
+      : 'This will reject the payment, ban this bidder, and move to the next highest bidder.',
+    danger: !isPaid,
+    confirmLabel: isPaid ? '✅ Yes, Confirm Payment' : '❌ Yes, Reject Payment',
+    onConfirm: async () => {
+      closeModal();
+      setTogglingId(productId);
+      try { const { data } = await api.put(`/payment/${productId}/status`, { status: newStatus }); toast.success(data.message); load(); }
+      catch (err) { toast.error(err.response?.data?.message || 'Error'); }
+      finally { setTogglingId(null); }
+    },
+  });
+};
 
   const handleManualToggle = async (productId, newStatus) => {
     if (!window.confirm(newStatus === 'paid' ? 'Confirm payment received?' : 'Reject and move to next bidder?')) return;
@@ -295,6 +309,15 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      <ConfirmModal
+        isOpen={modal.open}
+        title={modal.title}
+        message={modal.message}
+        confirmLabel={modal.confirmLabel}
+        danger={modal.danger}
+        onConfirm={modal.onConfirm}
+        onCancel={closeModal}
+      />
     </div>
   );
 }
