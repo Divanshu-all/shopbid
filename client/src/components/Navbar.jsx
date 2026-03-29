@@ -56,16 +56,14 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile bottom nav */}
+{/* Sub nav — sits below header */}
       {user && tabs.length > 0 && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 pb-safe md:hidden">
-          <div className="grid pb-1 pt-2" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+        <nav className="bg-white border-b border-slate-100 md:hidden">
+          <div className="grid" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
             {tabs.map(tab => (
               <Link key={tab.path} to={tab.path}
-                className={`flex flex-col items-center gap-1 py-1 transition-all ${isActive(tab.path) ? 'text-blue-600' : 'text-slate-400'}`}>
-                <div className={`p-1.5 rounded-xl transition-all ${isActive(tab.path) ? 'bg-blue-100' : ''}`}>
-                  {tab.icon}
-                </div>
+                className={`flex flex-col items-center gap-1 py-2 transition-all ${isActive(tab.path) ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}`}>
+                <div>{tab.icon}</div>
                 <span className="text-[10px] font-semibold">{tab.label}</span>
               </Link>
             ))}

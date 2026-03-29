@@ -351,14 +351,14 @@ export default function ProductDetail() {
         ) : (
           <div className="space-y-2">
             {bids.map((bid, i) => (
-              <div key={bid._id || i} className={`flex items-center justify-between py-3 px-4 rounded-xl ${i === 0 ? 'bg-brand-teal/10 border border-brand-teal/20' : 'bg-gray-800/50'}`}>
+              <div key={bid._id || i} className={`flex items-center justify-between py-3 px-4 rounded-xl ${i === 0 ? 'bg-blue-100 border border-blue-300' : 'bg-slate-50 border border-slate-100'}`}>
                 <div className="flex items-center gap-3">
                   {i === 0 && <FiAward className="text-brand-teal" />}
-                  <span className="text-white text-sm font-medium">{bid.bidder?.name}</span>
-                  {i === 0 && <span className="text-xs bg-brand-teal/20 text-brand-teal px-2 py-0.5 rounded-full">Highest</span>}
+                  <span className="text-slate-800 text-sm font-medium">{bid.bidder?.name}</span>
+                  {i === 0 && <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-semibold">Highest</span>
                 </div>
                 <div className="text-right">
-                  <p className="text-white font-bold">₹{bid.amount?.toLocaleString()}</p>
+                  <p className="text-slate-800 font-bold">₹{bid.amount?.toLocaleString()}</p>
                   <p className="text-gray-500 text-xs">{new Date(bid.createdAt).toLocaleTimeString()}</p>
                 </div>
               </div>
