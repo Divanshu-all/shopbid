@@ -355,7 +355,7 @@ export default function ProductDetail() {
                 <div className="flex items-center gap-3">
                   {i === 0 && <FiAward className="text-brand-teal" />}
                   <span className="text-slate-800 text-sm font-medium">{bid.bidder?.name}</span>
-                  {i === 0 && <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-semibold">Highest</span>
+                  {i === 0 && <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-semibold">Highest</span>}
                 </div>
                 <div className="text-right">
                   <p className="text-slate-800 font-bold">₹{bid.amount?.toLocaleString()}</p>
