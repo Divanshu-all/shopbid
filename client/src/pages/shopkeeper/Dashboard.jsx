@@ -278,10 +278,10 @@ export default function Dashboard() {
                   <p className="text-blue-600 font-bold">₹{p.currentBid?.toLocaleString()}</p>
                   <p className="text-slate-400 text-xs">{p.bidCount} bids · {p.views} views</p>
                   {p.status === 'active' && (
-                    <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center justify-between mt-1">
                       <BidTimer endsAt={p.endsAt} />
                       <button onClick={() => handleEndAuction(p._id)} disabled={endingId === p._id}
-                        className="text-xs text-red-500 hover:text-red-600 flex items-center gap-0.5">
+                              className="bg-red-50 border border-red-200 text-red-500 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1 flex-shrink-0">
                         <FiStopCircle size={11} /> {endingId === p._id ? '...' : 'End'}
                       </button>
                     </div>
