@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    socketRef.current = io('/', { withCredentials: true, autoConnect: true });
+    socketRef.current = io(import.meta.env.VITE_API_URL || '/', { withCredentials: true, autoConnect: true });
     socketRef.current.on('connect', () => console.log('🔌 Socket connected'));
     socketRef.current.on('disconnect', () => console.log('🔴 Socket disconnected'));
 
