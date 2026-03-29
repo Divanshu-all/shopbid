@@ -4,11 +4,10 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import BidTimer from '../../components/BidTimer';
-import toast from 'react-hot-toast';
-import { FiPlusCircle, FiPackage, FiBarChart2, FiSettings, FiTrendingUp, FiEye, FiAlertCircle, FiSearch, FiStopCircle, FiCheckCircle, FiClock, FiShoppingBag, FiX } from 'react-icons/fi';
 import ConfirmModal from '../../components/ConfirmModal';
-const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null, danger: false, confirmLabel: 'Confirm' });
-const closeModal = () => setModal(m => ({ ...m, open: false }));
+import toast from 'react-hot-toast';
+import { FiPlusCircle, FiPackage, FiSettings, FiSearch, FiStopCircle, FiCheckCircle, FiClock, FiShoppingBag, FiX } from 'react-icons/fi';
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { on, off } = useSocket();
@@ -23,7 +22,9 @@ export default function Dashboard() {
   const [searchError, setSearchError]   = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null, danger: false, confirmLabel: 'Confirm' });
 
+  const closeModal = () => setModal(m => ({ ...m, open: false }));
   const pendingPaymentProducts = products.filter(p => p.status === 'payment_pending');
 
   const load = async () => {
@@ -46,32 +47,41 @@ export default function Dashboard() {
     return () => { off('payment_made_by_buyer'); off('auction_reopened'); };
   }, []);
 
-const handleManualToggle = async (productId, newStatus) => {
-  const isPaid = newStatus === 'paid';
-  setModal({
-    open: true,
-    title: isPaid ? 'Confirm Payment Received?' : 'Reject Payment?',
-    message: isPaid
-      ? 'This will confirm the payment and generate an Order ID for the buyer.'
-      : 'This will reject the payment, ban this bidder, and move to the next highest bidder.',
-    danger: !isPaid,
-    confirmLabel: isPaid ? '✅ Yes, Confirm Payment' : '❌ Yes, Reject Payment',
-    onConfirm: async () => {
-      closeModal();
-      setTogglingId(productId);
-      try { const { data } = await api.put(`/payment/${productId}/status`, { status: newStatus }); toast.success(data.message); load(); }
-      catch (err) { toast.error(err.response?.data?.message || 'Error'); }
-      finally { setTogglingId(null); }
-    },
-  });
-};
+  const handleEndAuction = async (productId) => {
+    setModal({
+      open: true,
+      title: 'End Auction Now?',
+      message: 'This will immediately close the auction and start the payment window for the highest bidder.',
+      danger: true,
+      confirmLabel: 'Yes, End Auction',
+      onConfirm: async () => {
+        closeModal();
+        setEndingId(productId);
+        try { await api.post(`/payment/${productId}/end`); toast.success('Auction ended!'); load(); }
+        catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
+        finally { setEndingId(null); }
+      },
+    });
+  };
 
   const handleManualToggle = async (productId, newStatus) => {
-    if (!window.confirm(newStatus === 'paid' ? 'Confirm payment received?' : 'Reject and move to next bidder?')) return;
-    setTogglingId(productId);
-    try { const { data } = await api.put(`/payment/${productId}/status`, { status: newStatus }); toast.success(data.message); load(); }
-    catch (err) { toast.error(err.response?.data?.message || 'Error'); }
-    finally { setTogglingId(null); }
+    const isPaid = newStatus === 'paid';
+    setModal({
+      open: true,
+      title: isPaid ? 'Confirm Payment Received?' : 'Reject Payment?',
+      message: isPaid
+        ? 'This will confirm the payment and generate an Order ID for the buyer.'
+        : 'This will reject the payment, ban this bidder, and move to the next highest bidder.',
+      danger: !isPaid,
+      confirmLabel: isPaid ? '✅ Yes, Confirm Payment' : '❌ Yes, Reject Payment',
+      onConfirm: async () => {
+        closeModal();
+        setTogglingId(productId);
+        try { const { data } = await api.put(`/payment/${productId}/status`, { status: newStatus }); toast.success(data.message); load(); }
+        catch (err) { toast.error(err.response?.data?.message || 'Error'); }
+        finally { setTogglingId(null); }
+      },
+    });
   };
 
   const handleSearchOrder = async () => {
@@ -122,7 +132,7 @@ const handleManualToggle = async (productId, newStatus) => {
           { label: 'Active',  value: analytics?.activeListings  || 0, icon: '🔴', color: 'bg-blue-50 text-blue-700' },
           { label: 'Pending', value: analytics?.pendingPickups  || 0, icon: '📦', color: 'bg-orange-50 text-orange-700' },
           { label: 'Views',   value: analytics?.totalViews      || 0, icon: '👁️', color: 'bg-slate-50 text-slate-700' },
-        ].map((s,i) => (
+        ].map((s, i) => (
           <div key={i} className={`${s.color} rounded-3xl p-4`}>
             <p className="text-2xl mb-1">{s.icon}</p>
             <p className="text-2xl font-extrabold font-display">{s.value}</p>
@@ -217,7 +227,6 @@ const handleManualToggle = async (productId, newStatus) => {
                   </div>
                 </div>
 
-                {/* TXN verification */}
                 {p.txnCodeEntered ? (
                   <div className="bg-slate-50 rounded-2xl p-3 space-y-2">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Transaction Code Verification</p>
@@ -242,7 +251,6 @@ const handleManualToggle = async (productId, newStatus) => {
                   </div>
                 )}
 
-                {/* Manual toggle */}
                 <div>
                   <p className="text-xs text-slate-400 mb-2 font-medium">Manual Override:</p>
                   <div className="grid grid-cols-2 gap-2">
@@ -295,7 +303,7 @@ const handleManualToggle = async (productId, newStatus) => {
                     <div className="flex items-center justify-between mt-1">
                       <BidTimer endsAt={p.endsAt} />
                       <button onClick={() => handleEndAuction(p._id)} disabled={endingId === p._id}
-                              className="bg-red-50 border border-red-200 text-red-500 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1 flex-shrink-0">
+                        className="bg-red-50 border border-red-200 text-red-500 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1 flex-shrink-0">
                         <FiStopCircle size={11} /> {endingId === p._id ? '...' : 'End'}
                       </button>
                     </div>
@@ -309,6 +317,7 @@ const handleManualToggle = async (productId, newStatus) => {
           </div>
         )}
       </div>
+
       <ConfirmModal
         isOpen={modal.open}
         title={modal.title}
