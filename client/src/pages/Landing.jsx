@@ -229,7 +229,7 @@ export default function Landing() {
               </div>
               <span className="text-white font-extrabold text-2xl font-display tracking-tight">ShopBid</span>
             </div>
-            <p className="text-slate-300 text-xs font-medium tracking-wide mb-8">Hyperlocal Auction Marketplace · Made for the Hills ❄️</p>
+            <p className="text-slate-300 text-xs font-medium tracking-wide mb-8">Hyperlocal Auction Marketplace · Turning Local Shops into Online Stores </p>
 
             {/* Separator Line */}
             <div className="w-full max-w-2xl h-px bg-slate-700/50 mb-6" />

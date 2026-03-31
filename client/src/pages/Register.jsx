@@ -62,7 +62,7 @@ export default function Register() {
               <label className="block text-sm font-semibold text-slate-600 mb-1.5">Full Name</label>
               <div className="relative">
                 <FiUser className="absolute left-4 top-4 text-slate-400" />
-                <input className="input pl-11" placeholder="John Doe"
+                <input className="input pl-11" type="text" 
                   value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               </div>
             </div>
@@ -70,7 +70,7 @@ export default function Register() {
               <label className="block text-sm font-semibold text-slate-600 mb-1.5">Email</label>
               <div className="relative">
                 <FiMail className="absolute left-4 top-4 text-slate-400" />
-                <input className="input pl-11" type="email" placeholder="you@example.com"
+                <input className="input pl-11" type="email" 
                   value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
             </div>
