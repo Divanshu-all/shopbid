@@ -2,10 +2,20 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import ProductCard from '../../components/ProductCard';
-import { FiSearch, FiMap, FiSliders } from 'react-icons/fi';
+import { FiSearch, FiMap, FiX } from 'react-icons/fi';
 
 const CATEGORIES = ['all','electronics','clothing','food','furniture','books','sports','other'];
-const SORTS = [{ value: 'endsAt', label: 'Ending Soon' }, { value: 'newest', label: 'Newest' }, { value: 'price_low', label: '↑ Price' }, { value: 'price_high', label: '↓ Price' }];
+const SORTS = [
+  { value: 'endsAt',     label: 'Ending Soon' },
+  { value: 'newest',     label: 'Newest'      },
+  { value: 'price_low',  label: 'Price: Low'  },
+  { value: 'price_high', label: 'Price: High' },
+];
+
+const CAT_ICONS = {
+  all: '◈', electronics: '⚡', clothing: '◎', food: '◉',
+  furniture: '▣', books: '▤', sports: '◈', other: '◦',
+};
 
 export default function BuyerHome() {
   const [products, setProducts] = useState([]);
@@ -13,6 +23,7 @@ export default function BuyerHome() {
   const [search, setSearch]     = useState('');
   const [category, setCategory] = useState('all');
   const [sort, setSort]         = useState('endsAt');
+  const [mounted, setMounted]   = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -26,64 +37,123 @@ export default function BuyerHome() {
   };
 
   useEffect(() => { load(); }, [category, sort]);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-6">
-      {/* Header */}
-      <div className="pt-5 pb-4">
-        <h1 className="text-2xl font-extrabold text-slate-800 font-display">Live Auctions</h1>
-        <p className="text-slate-400 text-sm">{products.length} active near you</p>
+    <div className="bh-page">
+
+      {/* ── Hero banner ─────────────────────────────────────── */}
+      <div className="bh-hero">
+        <div className="bh-hero-grid" />
+        <div className="bh-hero-ring bh-hero-ring--1" />
+        <div className="bh-hero-ring bh-hero-ring--2" />
+        <div className="bh-hero-blob bh-hero-blob--tr" />
+        <div className="bh-hero-blob bh-hero-blob--bl" />
+
+        {/* Floating dots */}
+        {[1,2,3,4,5].map(i => <div key={i} className={`bh-hero-dot bh-hero-dot--${i}`} />)}
+
+        <div className={`bh-hero-content ${mounted ? 'bh-hero-content--in' : ''}`}>
+          <div className="bh-hero-live-badge">
+            <span className="bh-live-pulse" />
+            Live Auctions
+          </div>
+          <h1 className="bh-hero-title">Find &amp; Bid<br /><span className="bh-hero-title-accent">Near You</span></h1>
+          <p className="bh-hero-sub">{products.length} active listings right now</p>
+        </div>
       </div>
 
-      {/* Search bar */}
-      <div className="flex gap-2 mb-4">
-        <div className="relative flex-1">
-          <FiSearch className="absolute left-4 top-3.5 text-slate-400" size={16} />
-          <input className="input pl-10 text-sm" placeholder="Search products..."
-            value={search} onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && load()} />
+      {/* ── Search bar ──────────────────────────────────────── */}
+      <div className={`bh-search-wrap ${mounted ? 'bh-anim-slide-1' : 'bh-anim-hidden'}`}>
+        <div className="bh-search-box">
+          <FiSearch className="bh-search-icon" size={16} />
+          <input
+            className="bh-search-input"
+            placeholder="Search auctions..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && load()}
+          />
+          {search && (
+            <button className="bh-search-clear" onClick={() => { setSearch(''); load(); }}>
+              <FiX size={14} />
+            </button>
+          )}
         </div>
-        <Link to="/map" className="btn-secondary px-4 py-3 flex items-center gap-1.5 text-sm">
-          <FiMap size={16} /> Map
+        <Link to="/map" className="bh-map-btn">
+          <FiMap size={16} />
+          <span>Map</span>
         </Link>
       </div>
 
-      {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-3 scrollbar-hide">
-        {CATEGORIES.map(c => (
-          <button key={c} onClick={() => setCategory(c)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all capitalize flex-shrink-0 ${category === c ? 'bg-blue-600 text-white shadow-blue-sm' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
-            {c}
-          </button>
-        ))}
-      </div>
+      <div className="bh-body">
 
-      {/* Sort */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
-        {SORTS.map(s => (
-          <button key={s.value} onClick={() => setSort(s.value)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${sort === s.value ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-            {s.label}
-          </button>
-        ))}
-      </div>
+        {/* ── Category chips ────────────────────────────────── */}
+        <div className={`bh-chips-wrap ${mounted ? 'bh-anim-slide-2' : 'bh-anim-hidden'}`}>
+          <div className="bh-chips-scroll">
+            {CATEGORIES.map(c => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={`bh-chip ${category === c ? 'bh-chip--active' : ''}`}
+              >
+                <span className="bh-chip-icon">{CAT_ICONS[c]}</span>
+                <span className="bh-chip-label">{c}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-      {/* Grid */}
-      {loading ? (
-        <div className="grid grid-cols-2 gap-3">
-          {[...Array(6)].map((_,i) => <div key={i} className="aspect-square bg-blue-50 rounded-3xl animate-pulse" />)}
+        {/* ── Sort pills ────────────────────────────────────── */}
+        <div className={`bh-sort-wrap ${mounted ? 'bh-anim-slide-3' : 'bh-anim-hidden'}`}>
+          {SORTS.map(s => (
+            <button
+              key={s.value}
+              onClick={() => setSort(s.value)}
+              className={`bh-sort-pill ${sort === s.value ? 'bh-sort-pill--active' : ''}`}
+            >
+              {sort === s.value && <span className="bh-sort-dot" />}
+              {s.label}
+            </button>
+          ))}
         </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-5xl mb-4">🔍</p>
-          <p className="text-slate-600 font-semibold">No auctions found</p>
-          <p className="text-slate-400 text-sm mt-1">Try a different category</p>
+
+        {/* ── Section label ─────────────────────────────────── */}
+        <div className={`bh-section-row ${mounted ? 'bh-anim-slide-3' : 'bh-anim-hidden'}`}>
+          <span className="bh-section-title">
+            {category === 'all' ? 'All Listings' : category.charAt(0).toUpperCase() + category.slice(1)}
+          </span>
+          <span className="bh-section-count">{products.length} items</span>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {products.map(p => <ProductCard key={p._id} product={p} onExpire={load} />)}
-        </div>
-      )}
+
+        {/* ── Grid ──────────────────────────────────────────── */}
+        {loading ? (
+          <div className="bh-grid">
+            {[...Array(6)].map((_,i) => (
+              <div key={i} className="bh-skeleton" style={{ animationDelay: `${i * 0.08}s` }} />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="bh-empty">
+            <div className="bh-empty-icon-wrap">
+              <FiSearch size={28} className="bh-empty-icon" />
+            </div>
+            <p className="bh-empty-title">No auctions found</p>
+            <p className="bh-empty-sub">Try a different category or search term</p>
+            <button className="bh-empty-reset" onClick={() => { setCategory('all'); setSearch(''); }}>
+              Reset filters
+            </button>
+          </div>
+        ) : (
+          <div className="bh-grid">
+            {products.map((p, i) => (
+              <div key={p._id} className="bh-card-wrap" style={{ animationDelay: `${i * 0.06}s` }}>
+                <ProductCard product={p} onExpire={load} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

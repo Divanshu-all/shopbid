@@ -1,15 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FiUser, FiMail, FiLock, FiArrowRight, FiShoppingBag, FiShoppingCart } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiArrowRight, FiShoppingBag, FiShoppingCart, FiEye, FiEyeOff } from 'react-icons/fi';
+
+const Particle = ({ className }) => <div className={`register-particle ${className}`} />;
 
 export default function Register() {
-  const [params] = useSearchParams();
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: params.get('role') || 'buyer' });
+  const [params]  = useSearchParams();
+  const [form, setForm]       = useState({ name: '', email: '', password: '', role: params.get('role') || 'buyer' });
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [mounted, setMounted]   = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const navigate      = useNavigate();
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,73 +33,157 @@ export default function Register() {
     } else toast.error(res.message);
   };
 
+  const strengthLevel = Math.min(4, Math.floor(form.password.length / 3));
+  const strengthColors = ['', 'bg-red-400', 'bg-amber-400', 'bg-blue-500', 'bg-green-500'];
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Blue header */}
-      <div className="bg-blue-600 px-5 pt-10 pb-16 relative overflow-hidden">
-        <div className="absolute -top-8 -right-8 w-36 h-36 bg-blue-500 rounded-full animate-blob opacity-50" />
-        <div className="absolute bottom-4 left-4 w-24 h-24 bg-blue-700 rounded-full animate-blob delay-3000 opacity-30" />
-        <div className="relative z-10">
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-5">
-            <FiShoppingBag className="text-white text-xl" />
+    <div className="register-page">
+
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <div className="register-hero">
+        <div className="register-grid-texture" />
+
+        <div className="register-ring-wrap-outer"><div className="register-ring-outer" /></div>
+        <div className="register-ring-wrap-inner"><div className="register-ring-inner" /></div>
+
+        <div className="register-pulse-ring register-pulse-ring--lg" />
+        <div className="register-pulse-ring register-pulse-ring--sm" />
+
+        <div className="register-blob register-blob--tr" />
+        <div className="register-blob register-blob--bl" />
+
+        <Particle className="register-particle--1" />
+        <Particle className="register-particle--2" />
+        <Particle className="register-particle--3" />
+        <Particle className="register-particle--4" />
+        <Particle className="register-particle--5" />
+        <Particle className="register-particle--6" />
+
+        <div className={`register-hero-content ${mounted ? 'register-hero-content--visible' : ''}`}>
+          <div className="register-logo-badge">
+            <div className="register-logo-border" />
+            <div className="register-logo-inner">
+              <FiShoppingBag className="text-white text-2xl" />
+            </div>
           </div>
-          <h1 className="text-3xl font-extrabold text-white font-display mb-1">Create account</h1>
-          <p className="text-blue-200 text-sm">Free forever. No card needed.</p>
+          <h1 className="register-title">
+            Join<br />
+            <span className="register-title-accent">ShopBid.</span>
+          </h1>
+          <p className="register-subtitle">Free forever. No card needed.</p>
         </div>
       </div>
 
-      {/* Form */}
-      <div className="flex-1 bg-white rounded-t-4xl -mt-6 px-5 pt-8 relative z-10">
-        <div className="max-w-md mx-auto">
-          {/* Role selector */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+      {/* ── Wave ──────────────────────────────────────────────── */}
+      <div className="register-wave-wrap">
+        <svg viewBox="0 0 700 40" preserveAspectRatio="none" className="register-wave-svg">
+          <path d="M0,10 Q175,30 350,10 T700,10 L700,40 L0,40 Z" fill="white" />
+        </svg>
+      </div>
+
+      {/* ── Form ──────────────────────────────────────────────── */}
+      <div className="register-form-area">
+        <div className="register-form-inner">
+
+          {/* Role cards */}
+          <div className={`register-role-grid ${mounted ? 'register-anim-slide-1' : 'register-anim-hidden'}`}>
             {[
-              { value: 'buyer',      label: 'Buyer',      icon: <FiShoppingCart size={20}/>, desc: 'Discover & bid' },
-              { value: 'shopkeeper', label: 'Shopkeeper', icon: <FiShoppingBag size={20}/>,  desc: 'List & sell' },
+              { value: 'buyer',      label: 'Buyer',      icon: <FiShoppingCart size={18} />, desc: 'Discover & bid' },
+              { value: 'shopkeeper', label: 'Shopkeeper', icon: <FiShoppingBag  size={18} />, desc: 'List & sell'     },
             ].map(r => (
-              <button key={r.value} type="button" onClick={() => setForm(f => ({ ...f, role: r.value }))}
-                className={`p-4 rounded-2xl border-2 text-left transition-all ${form.role === r.value ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-white hover:border-blue-200'}`}>
-                <div className={`mb-2 ${form.role === r.value ? 'text-blue-600' : 'text-slate-400'}`}>{r.icon}</div>
-                <p className={`font-bold text-sm ${form.role === r.value ? 'text-blue-700' : 'text-slate-700'}`}>{r.label}</p>
-                <p className="text-xs text-slate-400">{r.desc}</p>
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => setForm(f => ({ ...f, role: r.value }))}
+                className={`register-role-card ${form.role === r.value ? 'register-role-card--active' : ''}`}
+              >
+                {form.role === r.value && <div className="register-role-shimmer-line" />}
+                <div className={`register-role-icon ${form.role === r.value ? 'register-role-icon--active' : ''}`}>{r.icon}</div>
+                <p className={`register-role-label ${form.role === r.value ? 'register-role-label--active' : ''}`}>{r.label}</p>
+                <p className="register-role-desc">{r.desc}</p>
               </button>
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-600 mb-1.5">Full Name</label>
-              <div className="relative">
-                <FiUser className="absolute left-4 top-4 text-slate-400" />
-                <input className="input pl-11" type="text" 
+          <form onSubmit={handleSubmit} className="register-form">
+
+            {/* Name */}
+            <div className={mounted ? 'register-anim-slide-2' : 'register-anim-hidden'}>
+              <label className="register-label">Full Name</label>
+              <div className="register-input-wrap">
+                <FiUser className="register-input-icon" />
+                <input className="register-input" type="text" placeholder="Your full name"
                   value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-600 mb-1.5">Email</label>
-              <div className="relative">
-                <FiMail className="absolute left-4 top-4 text-slate-400" />
-                <input className="input pl-11" type="email" 
+
+            {/* Email */}
+            <div className={mounted ? 'register-anim-slide-3' : 'register-anim-hidden'}>
+              <label className="register-label">Email Address</label>
+              <div className="register-input-wrap">
+                <FiMail className="register-input-icon" />
+                <input className="register-input" type="email" placeholder="you@example.com"
                   value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-600 mb-1.5">Password</label>
-              <div className="relative">
-                <FiLock className="absolute left-4 top-4 text-slate-400" />
-                <input className="input pl-11" type="password" placeholder="Min. 6 characters"
-                  value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+
+            {/* Password */}
+            <div className={mounted ? 'register-anim-slide-4' : 'register-anim-hidden'}>
+              <label className="register-label">Password</label>
+              <div className="register-input-wrap">
+                <FiLock className="register-input-icon" />
+                <input className="register-input register-input--pr" type={showPass ? 'text' : 'password'}
+                  placeholder="Min. 6 characters" value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                <button type="button" onClick={() => setShowPass(v => !v)} className="register-eye-btn">
+                  {showPass ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                </button>
               </div>
+              {form.password.length > 0 && (
+                <div className="register-strength-bar">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className={`register-strength-seg ${i <= strengthLevel ? strengthColors[strengthLevel] : 'bg-slate-200'}`} />
+                  ))}
+                </div>
+              )}
             </div>
-            <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2 mt-2">
-              {loading ? 'Creating account...' : <><span>Create Account</span><FiArrowRight /></>}
-            </button>
+
+            {/* Submit */}
+            <div className={mounted ? 'register-anim-slide-5' : 'register-anim-hidden'}>
+              <button type="submit" disabled={loading} className="register-submit-btn">
+                <div className="register-submit-shimmer" />
+                {loading ? (
+                  <>
+                    <svg className="register-spinner" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                    </svg>
+                    <span className="register-btn-text">Creating account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="register-btn-text">Create Account</span>
+                    <FiArrowRight className="register-btn-arrow" />
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
-          <p className="text-center text-slate-500 text-sm mt-6">
+          <p className={`register-footer-text ${mounted ? 'register-anim-fade-6' : 'register-anim-hidden'}`}>
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-semibold hover:underline">Log in</Link>
+            <Link to="/login" className="register-footer-link">Log in</Link>
           </p>
+
+          <div className={`register-trust-strip ${mounted ? 'register-anim-fade-7' : 'register-anim-hidden'}`}>
+            {['Secure', 'Free Forever', 'No Card'].map(badge => (
+              <span key={badge} className="register-trust-badge">
+                <span className="register-trust-dot" />
+                {badge}
+              </span>
+            ))}
+          </div>
+
         </div>
       </div>
     </div>
