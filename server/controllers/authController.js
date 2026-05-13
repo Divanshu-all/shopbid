@@ -1,5 +1,6 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const jwt    = require('jsonwebtoken');
+const crypto = require('crypto');
+const User   = require('../models/User');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
@@ -22,7 +23,7 @@ const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    const user = await User.create({ name, email, password, role });
+    const user  = await User.create({ name, email, password, role });
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -71,4 +72,51 @@ const getMe = async (req, res) => {
   res.json({ success: true, user: req.user });
 };
 
-module.exports = { register, login, getMe };
+// @POST /api/auth/google
+// Receives { name, email, picture, googleId } from the frontend after Google OAuth.
+// Finds an existing user by email or creates a new one, then returns a JWT.
+const googleAuth = async (req, res) => {
+  try {
+    const { name, email, picture, googleId } = req.body;
+
+    if (!email || !googleId) {
+      return res.status(400).json({ success: false, message: 'Invalid Google payload' });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // Existing user — silently attach googleId / avatar if this is their first Google sign-in
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (!user.avatar) user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // Brand-new user — create with a random unusable password
+      // Your pre-save hook will hash it, but no one can ever log in with it directly
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      user = await User.create({
+        name,
+        email,
+        password: randomPassword,
+        googleId,
+        avatar:   picture,
+        role:     'buyer',           // default; user can request role change if needed
+      });
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      success: true,
+      token,
+      user: { _id: user._id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
+    });
+  } catch (err) {
+    console.error('Google auth error:', err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { register, login, getMe, googleAuth };

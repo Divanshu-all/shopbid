@@ -1,33 +1,37 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
   name: {
-    type: String,
+    type:     String,
     required: [true, 'Name is required'],
-    trim: true,
+    trim:     true,
   },
   email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
+    type:      String,
+    required:  [true, 'Email is required'],
+    unique:    true,
     lowercase: true,
-    trim: true,
+    trim:      true,
   },
   password: {
-    type: String,
-    required: [true, 'Password is required'],
+    type:      String,
+    required:  [true, 'Password is required'],
     minlength: 6,
-    select: false,
+    select:    false,
   },
   role: {
-    type: String,
-    enum: ['shopkeeper', 'buyer'],
+    type:     String,
+    enum:     ['shopkeeper', 'buyer'],
     required: true,
   },
   avatar: {
-    type: String,
+    type:    String,
     default: '',
+  },
+  googleId: {               // ← ADD: links account to Google profile
+    type:   String,
+    sparse: true,           // sparse = unique index but allows many null values
   },
 }, { timestamps: true });
 
