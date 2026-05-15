@@ -994,3 +994,47 @@
 .bh-anim-slide-1 { animation: bh-slideUp .5s .10s cubic-bezier(.22,1,.36,1) both; }
 .bh-anim-slide-2 { animation: bh-slideUp .5s .20s cubic-bezier(.22,1,.36,1) both; }
 .bh-anim-slide-3 { animation: bh-slideUp .5s .30s cubic-bezier(.22,1,.36,1) both; }
+
+/* ── Add these to your existing Register CSS in index.css ── */
+
+.register-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, box-shadow .2s, transform .15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.register-google-btn:hover  { border-color: #93c5fd; background: #f8faff; box-shadow: 0 4px 16px rgba(37,99,235,.10); }
+.register-google-btn:active { transform: scale(.98); }
+.register-google-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.register-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+.register-divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+.register-divider-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  white-space: nowrap;
+}
