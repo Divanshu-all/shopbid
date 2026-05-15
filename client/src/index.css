@@ -592,7 +592,7 @@
 
 /* ── Keyframes ─────────────────────────────────────────────── */
 @keyframes bh-floatDot {
-  0%, 100% { transform: translateY(0)     opacity: .35; }
+  0%, 100% { transform: translateY(0);      opacity: .35; }
   50%       { transform: translateY(-14px); opacity: .7;  }
 }
 @keyframes bh-spinCW  { to { transform: rotate(360deg);  } }
